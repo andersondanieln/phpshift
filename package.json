@@ -1,0 +1,71 @@
+{
+  "name": "phpshift-react",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A modern PHP version switcher built with Electron, React, and Vite.",
+  "author": "andercoder.com",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:vite\" \"npm:dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "wait-on tcp:5173 && cross-env IS_DEV=true electron .",
+    "build": "vite build && electron-builder",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.2.1",
+    "electron-builder": "^24.13.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite": "^5.0.8",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.andercoder.phpshift",
+    "productName": "PHPShift",
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "locales",
+        "to": "locales"
+      },
+      {
+        "from": "public/icon.png",
+        "to": "icon.png"
+      }
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "runAfterFinish": false,
+      "installerLanguages": [
+        "en_US",
+        "pt_BR",
+        "es_ES",
+        "zh_CN"
+      ],
+      "language": "1033",
+      "include": "electron/build/installer.nsh",
+      "warningsAsErrors": false
+    }
+  }
+}
