@@ -18,6 +18,8 @@ function App() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
     const [isAppSettingsModalOpen, setIsAppSettingsModalOpen] = useState(false);
+    
+    const [isExternalVersionActive, setIsExternalVersionActive] = useState(false);
 
     const refreshVersions = useCallback(async (currentPath) => {
         try {
@@ -44,28 +46,41 @@ function App() {
                 await window.api.setPhpPath(savedPath);
             }
             setPhpPath(savedPath);
+
             const availableVersions = await refreshVersions(savedPath);
-            const systemActiveVersion = (await window.api.getCurrentVersion(savedPath)).data;
+            const systemVersionResult = await window.api.getCurrentVersion(savedPath);
             const lastSavedActiveVersion = await window.api.getLastActiveVersion();
+            
             let initialActiveVersion = null;
+            if (systemVersionResult.data === 'Externo') {
+                setIsExternalVersionActive(true);
+            } else {
+                setIsExternalVersionActive(false);
+            }
+
             if (availableVersions.includes(lastSavedActiveVersion)) {
                 initialActiveVersion = lastSavedActiveVersion;
-            } else if (availableVersions.includes(systemActiveVersion)) {
-                initialActiveVersion = systemActiveVersion;
+            } else if (availableVersions.includes(systemVersionResult.data)) {
+                initialActiveVersion = systemVersionResult.data;
             }
+            
             setActiveVersion(initialActiveVersion);
             window.api.updateTray(availableVersions, initialActiveVersion);
             setIsLoading(false);
         }
+        
         loadInitialData();
+
         const cleanup = window.api.onVersionChangedFromTray((newVersion) => {
             setActiveVersion(newVersion);
             window.api.setLastActiveVersion(newVersion);
+            setIsExternalVersionActive(false);
             const successMsg = translations.statusSwitchSuccess 
                 ? translations.statusSwitchSuccess.replace('{version}', newVersion)
                 : `Switched to ${newVersion}`;
             showToast(successMsg, 'success');
         });
+        
         return cleanup;
     }, [refreshVersions, translations.statusSwitchSuccess, showToast]);
 
@@ -81,10 +96,12 @@ function App() {
         setActiveVersion(version);
         showToast(translations.statusSwitchingTo.replace('{version}', version), 'success');
         const result = await window.api.setActiveVersion({ basePath: phpPath, version });
+        
         if (result.success) {
             showToast(translations.statusSwitchSuccess.replace('{version}', version), 'success');
             await window.api.setLastActiveVersion(version);
             window.api.updateTray(versions, version);
+            setIsExternalVersionActive(false);
         } else {
             showToast(translations.statusSwitchError, 'error');
             setActiveVersion(previousVersion);
@@ -94,14 +111,18 @@ function App() {
     const handleUpdatePath = async () => {
         await window.api.setPhpPath(phpPath);
         showToast(translations.statusPathSaved, 'success');
+        
         const availableVersions = await refreshVersions(phpPath);
-        const systemActiveVersion = (await window.api.getCurrentVersion(phpPath)).data;
+        const systemVersionResult = await window.api.getCurrentVersion(phpPath);
         const lastSavedActiveVersion = await window.api.getLastActiveVersion();
+        
+        setIsExternalVersionActive(systemVersionResult.data === 'Externo');
+        
         let newActiveVersion = null;
         if (availableVersions.includes(lastSavedActiveVersion)) {
             newActiveVersion = lastSavedActiveVersion;
-        } else if (availableVersions.includes(systemActiveVersion)) {
-            newActiveVersion = systemActiveVersion;
+        } else if (availableVersions.includes(systemVersionResult.data)) {
+            newActiveVersion = systemVersionResult.data;
         }
         setActiveVersion(newActiveVersion);
         window.api.updateTray(availableVersions, newActiveVersion);
@@ -122,35 +143,38 @@ function App() {
             <main id="main-content">
                 {isLoading ? (
                     <div className="state-placeholder"><p>{translations.loadingVersions || 'Loading...'}</p></div>
-                ) : versions.length > 0 ? (
-                    <div className="version-grid">
-                        {versions.map(v => 
-                            <VersionCard 
-                                key={v} 
-                                version={v} 
-                                isActive={v === activeVersion} 
-                                onVersionClick={handleVersionClick} 
-                                translations={translations} 
-                            />
-                        )}
-                    </div>
                 ) : (
-                    <div className="state-placeholder">
-                        <h2>{translations.noVersionsFound}</h2>
-                        <p>{translations.noVersionsFoundDesc}</p>
-                        <button onClick={() => window.api.openFolder(phpPath)} className="button-primary">{translations.openVersionsFolder}</button>
-                    </div>
+                    <>
+                        {isExternalVersionActive && (
+                            <div className="warning-banner">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                <span>{translations.externalVersionWarning}</span>
+                            </div>
+                        )}
+                        {versions.length > 0 ? (
+                            <div className="version-grid">
+                                {versions.map(v => 
+                                    <VersionCard 
+                                        key={v} 
+                                        version={v} 
+                                        isActive={v === activeVersion} 
+                                        onVersionClick={handleVersionClick} 
+                                        translations={translations} 
+                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <div className="state-placeholder">
+                                <h2>{translations.noVersionsFound}</h2>
+                                <p>{translations.noVersionsFoundDesc}</p>
+                                <button onClick={() => window.api.openFolder(phpPath)} className="button-primary">{translations.openVersionsFolder}</button>
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
             <Footer />
-            {isSettingsModalOpen && 
-                <SettingsModal 
-                    activeVersion={activeVersion}
-                    phpPath={phpPath}
-                    onClose={() => setIsSettingsModalOpen(false)}
-                    translations={translations}
-                />
-            }
+            {isSettingsModalOpen && <SettingsModal activeVersion={activeVersion} phpPath={phpPath} onClose={() => setIsSettingsModalOpen(false)} translations={translations} />}
             {isHelpModalOpen && <HelpModal onClose={() => setIsHelpModalOpen(false)} translations={translations} />}
             {isAppSettingsModalOpen && <AppSettingsModal onClose={() => setIsAppSettingsModalOpen(false)} translations={translations} />}
         </div>

@@ -30,5 +30,6 @@
   "helpGotIt": "好的！",
   "appSettingsTitle": "应用设置",
   "appSettingsAutoStart": "登录时启动 PHPShift",
-  "appSettingsAutoStartDescription": "自动在系统托盘中启动应用程序。"
+  "appSettingsAutoStartDescription": "自动在系统托盘中启动应用程序。",
+  "externalVersionWarning": "您系统的 PATH 中当前有一个外部 PHP 版本处于活动状态。选择下面的版本将优先使用。"
 }

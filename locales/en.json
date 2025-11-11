@@ -30,5 +30,6 @@
   "helpGotIt": "Got it!",
   "appSettingsTitle": "Application Settings",
   "appSettingsAutoStart": "Launch PHPShift when you log on",
-  "appSettingsAutoStartDescription": "Automatically start the application in the system tray."
+  "appSettingsAutoStartDescription": "Automatically start the application in the system tray.",
+  "externalVersionWarning": "An external PHP version is currently active in your system's PATH. Selecting a version below will take precedence."
 }

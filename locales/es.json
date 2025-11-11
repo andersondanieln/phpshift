@@ -30,5 +30,6 @@
   "helpGotIt": "¡Entendido!",
   "appSettingsTitle": "Configuración de la Aplicación",
   "appSettingsAutoStart": "Iniciar PHPShift al iniciar sesión",
-  "appSettingsAutoStartDescription": "Inicia automáticamente la aplicación en la bandeja del sistema."
+  "appSettingsAutoStartDescription": "Inicia automáticamente la aplicación en la bandeja del sistema.",
+  "externalVersionWarning": "Una versión externa de PHP está actualmente activa en el PATH de su sistema. Seleccionar una versión a continuación tendrá prioridad."
 }

@@ -556,3 +556,28 @@ input:checked + .slider:before {
         gap: 1rem;
     }
 }
+.warning-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #fffbe6; 
+    color: #926c09; 
+    border: 1px solid #ffe58f; 
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0 auto 1.5rem auto;
+    max-width: 1400px;
+    font-size: 0.9rem;
+}
+
+.warning-banner svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.dark-theme .warning-banner {
+    background-color: #3b2e00;
+    color: #ffdc73;
+    border-color: #8c6d00;
+}
