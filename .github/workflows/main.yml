@@ -29,8 +29,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: "patch"
-          pre_release_identifier: "Beta"
 
+      - name: Update package.json version
+        run: npm version ${{ steps.tag_version.outputs.new_version }} --no-git-tag-version
+        
       - name: Build application
         run: npm run build
         env:
@@ -48,8 +50,8 @@ jobs:
             </p>
             
             Official release of version ${{ steps.tag_version.outputs.new_tag }}.
-            
+
           files: release/*.exe
-          prerelease: true
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

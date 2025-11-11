@@ -1,7 +1,7 @@
 {
   "name": "phpshift-react",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "A modern PHP version switcher built with Electron, React, and Vite.",
   "author": "andercoder.com",
   "main": "electron/main.js",
