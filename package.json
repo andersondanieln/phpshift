@@ -41,10 +41,6 @@
       {
         "from": "public/icon.png",
         "to": "icon.png"
-      },
-      {
-        "from": "electron/build/installer.nsh",
-        "to": "build/installer.nsh"
       }
     ],
     "directories": {
@@ -67,7 +63,7 @@
         "zh_CN"
       ],
       "language": "1033",
-      "include": "build/installer.nsh",
+      "include": "electron/build/installer.nsh",
       "warningsAsErrors": false
     }
   }
