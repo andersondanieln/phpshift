@@ -64,7 +64,8 @@
       ],
       "language": "1033",
       "include": "build/installer.nsh",
-      "warningsAsErrors": false
+      "warningsAsErrors": false,
+      "artifactName": "${productName}-${version}-setup.${ext}"
     }
   }
 }

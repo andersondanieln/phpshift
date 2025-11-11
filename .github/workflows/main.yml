@@ -42,7 +42,13 @@ jobs:
         with:
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: "Official release of version ${{ steps.tag_version.outputs.new_tag }}."
+          body: |
+            <p align="center">
+              <img width="150" alt="logo" src="https://github.com/user-attachments/assets/96e809ae-6a6f-4908-b820-d1339fda1c31" />
+            </p>
+            
+            Official release of version ${{ steps.tag_version.outputs.new_tag }}.
+            
           files: release/*.exe
           prerelease: true
         env:
