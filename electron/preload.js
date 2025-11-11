@@ -4,6 +4,9 @@ contextBridge.exposeInMainWorld('api', {
     getInitialData: () => ipcRenderer.invoke('get-initial-data'),
     openExternalLink: (url) => ipcRenderer.invoke('open-external-link', url),
     
+    // Versão do App
+    getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+
     // Gerenciamento de Estado Persistente
     setLanguage: (lang) => ipcRenderer.invoke('set-language', lang),
     setTheme: (theme) => ipcRenderer.invoke('set-theme', theme),

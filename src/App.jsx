@@ -18,8 +18,8 @@ function App() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
     const [isAppSettingsModalOpen, setIsAppSettingsModalOpen] = useState(false);
-    
     const [isExternalVersionActive, setIsExternalVersionActive] = useState(false);
+    const [appVersion, setAppVersion] = useState(''); 
 
     const refreshVersions = useCallback(async (currentPath) => {
         try {
@@ -38,6 +38,10 @@ function App() {
             setIsLoading(true);
             const { theme: savedTheme, translations: loadedTranslations } = await window.api.getInitialData();
             if (loadedTranslations) setTranslations(loadedTranslations);
+            
+            const version = await window.api.getAppVersion();
+            setAppVersion(version);
+
             handleThemeChange(savedTheme, false);
 
             let savedPath = await window.api.getPhpPath();
@@ -46,41 +50,32 @@ function App() {
                 await window.api.setPhpPath(savedPath);
             }
             setPhpPath(savedPath);
-
             const availableVersions = await refreshVersions(savedPath);
             const systemVersionResult = await window.api.getCurrentVersion(savedPath);
             const lastSavedActiveVersion = await window.api.getLastActiveVersion();
-            
             let initialActiveVersion = null;
             if (systemVersionResult.data === 'Externo') {
                 setIsExternalVersionActive(true);
             } else {
                 setIsExternalVersionActive(false);
             }
-
             if (availableVersions.includes(lastSavedActiveVersion)) {
                 initialActiveVersion = lastSavedActiveVersion;
             } else if (availableVersions.includes(systemVersionResult.data)) {
                 initialActiveVersion = systemVersionResult.data;
             }
-            
             setActiveVersion(initialActiveVersion);
             window.api.updateTray(availableVersions, initialActiveVersion);
             setIsLoading(false);
         }
-        
         loadInitialData();
-
         const cleanup = window.api.onVersionChangedFromTray((newVersion) => {
             setActiveVersion(newVersion);
             window.api.setLastActiveVersion(newVersion);
             setIsExternalVersionActive(false);
-            const successMsg = translations.statusSwitchSuccess 
-                ? translations.statusSwitchSuccess.replace('{version}', newVersion)
-                : `Switched to ${newVersion}`;
+            const successMsg = translations.statusSwitchSuccess ? translations.statusSwitchSuccess.replace('{version}', newVersion) : `Switched to ${newVersion}`;
             showToast(successMsg, 'success');
         });
-        
         return cleanup;
     }, [refreshVersions, translations.statusSwitchSuccess, showToast]);
 
@@ -96,7 +91,6 @@ function App() {
         setActiveVersion(version);
         showToast(translations.statusSwitchingTo.replace('{version}', version), 'success');
         const result = await window.api.setActiveVersion({ basePath: phpPath, version });
-        
         if (result.success) {
             showToast(translations.statusSwitchSuccess.replace('{version}', version), 'success');
             await window.api.setLastActiveVersion(version);
@@ -111,13 +105,10 @@ function App() {
     const handleUpdatePath = async () => {
         await window.api.setPhpPath(phpPath);
         showToast(translations.statusPathSaved, 'success');
-        
         const availableVersions = await refreshVersions(phpPath);
         const systemVersionResult = await window.api.getCurrentVersion(phpPath);
         const lastSavedActiveVersion = await window.api.getLastActiveVersion();
-        
         setIsExternalVersionActive(systemVersionResult.data === 'Externo');
-        
         let newActiveVersion = null;
         if (availableVersions.includes(lastSavedActiveVersion)) {
             newActiveVersion = lastSavedActiveVersion;
@@ -173,7 +164,7 @@ function App() {
                     </>
                 )}
             </main>
-            <Footer />
+            <Footer appVersion={appVersion} />
             {isSettingsModalOpen && <SettingsModal activeVersion={activeVersion} phpPath={phpPath} onClose={() => setIsSettingsModalOpen(false)} translations={translations} />}
             {isHelpModalOpen && <HelpModal onClose={() => setIsHelpModalOpen(false)} translations={translations} />}
             {isAppSettingsModalOpen && <AppSettingsModal onClose={() => setIsAppSettingsModalOpen(false)} translations={translations} />}
